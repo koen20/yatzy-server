@@ -18,7 +18,7 @@ data class Message(
     data class Subscribe(val userId: String)
 
     @Serializable
-    data class Score(val username: String, val score: Int, val fullScore: JsonObject)
+    data class Score(val username: String, val game: String, val score: Int, val fullScore: JsonObject)
 
     @Serializable
     data class Login(val userId: String, val key: String, val clientVersion: Int)
