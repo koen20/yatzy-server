@@ -19,4 +19,4 @@ USER $APPLICATION_USER
 COPY --from=builder /usr/src/app/Yatzy-server-1.0/ /app/
 WORKDIR /config
 
-CMD /app/bin/recorder
+CMD /app/bin/Yatzy-server
