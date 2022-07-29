@@ -24,7 +24,7 @@ fun Application.configureSockets(storage: StorageMysql) {
 
     routing {
         val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
-        webSocket("ws") {
+        webSocket("api/v1/ws") {
             val thisConnection = Connection(this)
             connections += thisConnection
 
