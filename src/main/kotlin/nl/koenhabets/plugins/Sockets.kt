@@ -33,21 +33,28 @@ fun Application.configureSockets(storage: StorageMysql) {
                     when (frame) {
                         is Frame.Text -> {
                             val res = Json.decodeFromString<Message>(frame.readText())
-
-                            if (res.action == Action.login) {
+                            if (res.action == ActionType.login) {
+                                var success = false
                                 val actionRes = Json.decodeFromJsonElement<Message.Login>(res.data)
-                                thisConnection.loggedIn = true
-                                thisConnection.userId = actionRes.userId
+                                if (actionRes.key !== null) { //todo check if key and userid is correct
+                                    thisConnection.loggedIn = true
+                                    thisConnection.userId = actionRes.userId
+                                    success = true
+                                }
+                                val loginResponse = Response.LoginResponse(success)
+                                val response = Response(ResponseType.loginResponse, Json.encodeToJsonElement(loginResponse).jsonObject)
+                                thisConnection.session.send(response.toString())
                             } else if (thisConnection.loggedIn) {
-                                if (res.action == Action.subscribe) {
+                                if (res.action == ActionType.subscribe) {
                                     val actionRes = Json.decodeFromJsonElement<Message.Subscribe>(res.data)
                                     thisConnection.subscriptions.add(actionRes.userId)
-                                } else if (res.action == Action.score) {
+                                } else if (res.action == ActionType.score) {
                                     val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
                                     connections.forEach { connection ->
                                         connection.subscriptions.forEach {
                                             if (it == thisConnection.userId) {
-                                                connection.session.send(actionRes.toString())
+                                                val response = Response(ResponseType.scoreResponse, Json.encodeToJsonElement(actionRes).jsonObject)
+                                                connection.session.send(response.toString())
                                             }
                                         }
                                     }
