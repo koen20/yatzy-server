@@ -8,7 +8,7 @@ import java.util.*
 
 class StorageMysql(configItem: ConfigItem?) {
     lateinit var conn: Connection
-    var userDao: UserDao
+    //var userDao: UserDao
     private lateinit var configItem: ConfigItem
 
     init {
@@ -33,7 +33,7 @@ class StorageMysql(configItem: ConfigItem?) {
                 }
             }, 10000, 60000)
         }
-        userDao = UserDaoImpl(conn)
+        //userDao = UserDaoImpl(conn)
     }
 
     fun initStorage() {

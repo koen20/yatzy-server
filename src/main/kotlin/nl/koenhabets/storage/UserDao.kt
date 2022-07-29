@@ -8,7 +8,7 @@ interface UserDao {
     fun checkUser(userId: String, key: String): Boolean
 }
 
-class UserDaoImpl (conn: Connection) : UserDao {
+class UserDaoImpl (conn: Connection?) : UserDao {
     private var users: ArrayList<User> = ArrayList()
 
     override fun checkUser(userId: String, key: String): Boolean {

@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "nl.koenhabets"
-version = "0.0.1"
+version = "1.0"
 application {
     mainClass.set("nl.koenhabets.ApplicationKt")
 
