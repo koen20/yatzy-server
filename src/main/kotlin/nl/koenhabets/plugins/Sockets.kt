@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.websocket.*
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import nl.koenhabets.model.*
 import nl.koenhabets.storage.StorageMysql
 import java.util.*
@@ -43,7 +44,7 @@ fun Application.configureSockets(storage: StorageMysql) {
                                 }
                                 val loginResponse = Response.LoginResponse(success)
                                 val response = Response(ResponseType.loginResponse, Json.encodeToJsonElement(loginResponse).jsonObject)
-                                thisConnection.session.send(response.toString())
+                                thisConnection.session.send(Json.encodeToString(response))
                             } else if (thisConnection.loggedIn) {
                                 if (res.action == ActionType.subscribe) {
                                     val actionRes = Json.decodeFromJsonElement<Message.Subscribe>(res.data)
@@ -54,7 +55,7 @@ fun Application.configureSockets(storage: StorageMysql) {
                                         connection.subscriptions.forEach {
                                             if (it == thisConnection.userId) {
                                                 val response = Response(ResponseType.scoreResponse, Json.encodeToJsonElement(actionRes).jsonObject)
-                                                connection.session.send(response.toString())
+                                                connection.session.send(Json.encodeToString(response))
                                             }
                                         }
                                     }
