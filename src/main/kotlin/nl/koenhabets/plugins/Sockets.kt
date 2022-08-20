@@ -48,7 +48,9 @@ fun Application.configureSockets(storage: StorageMysql) {
                             } else if (thisConnection.loggedIn) {
                                 if (res.action == ActionType.subscribe) {
                                     val actionRes = Json.decodeFromJsonElement<Message.Subscribe>(res.data)
-                                    thisConnection.subscriptions.add(actionRes.userId)
+                                    if (!thisConnection.subscriptions.contains(actionRes.userId)) {
+                                        thisConnection.subscriptions.add(actionRes.userId)
+                                    }
                                 } else if (res.action == ActionType.score) {
                                     val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
                                     connections.forEach { connection ->
