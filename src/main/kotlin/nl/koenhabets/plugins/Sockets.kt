@@ -20,7 +20,7 @@ fun Application.configureSockets(storage: StorageMysql) {
         timeout = Duration.ofSeconds(15)
         maxFrameSize = Long.MAX_VALUE
         masking = false
-        contentConverter = KotlinxWebsocketSerializationConverter(Json)
+        contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true })
     }
 
     routing {
@@ -43,7 +43,10 @@ fun Application.configureSockets(storage: StorageMysql) {
                                     success = true
                                 }
                                 val loginResponse = Response.LoginResponse(success)
-                                val response = Response(ResponseType.loginResponse, Json.encodeToJsonElement(loginResponse).jsonObject)
+                                val response = Response(
+                                    ResponseType.loginResponse,
+                                    Json.encodeToJsonElement(loginResponse).jsonObject
+                                )
                                 thisConnection.session.send(Json.encodeToString(response))
                             } else if (thisConnection.loggedIn) {
                                 if (res.action == ActionType.subscribe) {
@@ -52,18 +55,32 @@ fun Application.configureSockets(storage: StorageMysql) {
                                         thisConnection.subscriptions.add(actionRes.userId)
                                     }
                                 } else if (res.action == ActionType.score) {
-                                    val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
-                                    connections.forEach { connection ->
-                                        connection.subscriptions.forEach {
-                                            if (it == thisConnection.userId) {
-                                                val response = Response(ResponseType.scoreResponse, Json.encodeToJsonElement(actionRes).jsonObject)
-                                                connection.session.send(Json.encodeToString(response))
+                                    if (thisConnection.loggedIn && thisConnection.userId !== null) {
+                                        val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
+                                        val scoreResponse = Response.ScoreResponse(
+                                            actionRes.username,
+                                            thisConnection.userId!!,
+                                            actionRes.game,
+                                            actionRes.score,
+                                            actionRes.fullScore,
+                                            actionRes.lastUpdate
+                                        )
+                                        connections.forEach { connection ->
+                                            connection.subscriptions.forEach {
+                                                if (it == thisConnection.userId) {
+                                                    val response = Response(
+                                                        ResponseType.scoreResponse,
+                                                        Json.encodeToJsonElement(scoreResponse).jsonObject
+                                                    )
+                                                    connection.session.send(Json.encodeToString(response))
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+
                         is Frame.Close -> {
                             println("closed")
                         }
