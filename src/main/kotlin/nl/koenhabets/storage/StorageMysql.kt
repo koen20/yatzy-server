@@ -7,8 +7,8 @@ import java.sql.SQLException
 import java.util.*
 
 class StorageMysql(configItem: ConfigItem?) {
-    lateinit var conn: Connection
-    //var userDao: UserDao
+    var conn: Connection? = null
+    var userDao: UserDao
     private lateinit var configItem: ConfigItem
 
     init {
@@ -23,8 +23,8 @@ class StorageMysql(configItem: ConfigItem?) {
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     try {
-                        if (!conn.isValid(3000)) {
-                            conn.close()
+                        if (conn?.isValid(3000) != true) {
+                            conn?.close()
                             initStorage()
                         }
                     } catch (e: SQLException) {
@@ -32,8 +32,10 @@ class StorageMysql(configItem: ConfigItem?) {
                     }
                 }
             }, 10000, 60000)
+        } else {
+            println("Config doesn't exist. Storage is disabled")
         }
-        //userDao = UserDaoImpl(conn)
+        userDao = UserDaoImpl(conn)
     }
 
     fun initStorage() {
@@ -43,7 +45,7 @@ class StorageMysql(configItem: ConfigItem?) {
 
     fun disconnect() {
         try {
-            conn.close()
+            conn?.close()
         } catch (_: Exception) {
 
         }

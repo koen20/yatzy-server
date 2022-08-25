@@ -1,18 +1,20 @@
 package nl.koenhabets.plugins
 
 import io.ktor.serialization.kotlinx.*
-import kotlinx.serialization.json.*
-import io.ktor.server.websocket.*
-import java.time.Duration
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 import nl.koenhabets.model.*
 import nl.koenhabets.storage.StorageMysql
+import java.time.Duration
 import java.util.*
-import kotlin.collections.LinkedHashSet
 
 fun Application.configureSockets(storage: StorageMysql) {
     install(WebSockets) {
@@ -37,7 +39,7 @@ fun Application.configureSockets(storage: StorageMysql) {
                             if (res.action == ActionType.login) {
                                 var success = false
                                 val actionRes = Json.decodeFromJsonElement<Message.Login>(res.data)
-                                if (actionRes.key !== null) { //todo check if key and userid is correct
+                                if (storage.userDao.checkUser(actionRes.userId, actionRes.key)) {
                                     thisConnection.loggedIn = true
                                     thisConnection.userId = actionRes.userId
                                     success = true
@@ -84,10 +86,11 @@ fun Application.configureSockets(storage: StorageMysql) {
                         is Frame.Close -> {
                             println("closed")
                         }
+
+                        else -> {}
                     }
                 }
             } finally {
-                println("Removing $thisConnection!")
                 connections -= thisConnection
             }
         }
