@@ -79,6 +79,11 @@ fun Application.configureSockets(storage: StorageMysql) {
                                             }
                                         }
                                     }
+                                } else if (res.action == ActionType.endGame) {
+                                    val actionRes = Json.decodeFromJsonElement<Message.EndGame>(res.data)
+                                    if (actionRes.game !== "test") {
+                                        storage.gameDao.addGame(actionRes)
+                                    }
                                 }
                             }
                         }

@@ -9,6 +9,7 @@ import java.util.*
 class StorageMysql(configItem: ConfigItem?) {
     var conn: Connection? = null
     var userDao: UserDao
+    var gameDao: GameDao
     private lateinit var configItem: ConfigItem
 
     init {
@@ -36,6 +37,7 @@ class StorageMysql(configItem: ConfigItem?) {
             println("Config doesn't exist. Storage is disabled")
         }
         userDao = UserDaoImpl(conn)
+        gameDao = GameDaoImpl(conn)
     }
 
     fun initStorage() {
