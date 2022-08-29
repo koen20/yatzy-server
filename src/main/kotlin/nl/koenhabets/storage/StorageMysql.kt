@@ -25,7 +25,7 @@ class StorageMysql(configItem: ConfigItem?) {
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     try {
-                        if (conn?.isValid(3000) != true) {
+                        if (conn?.isValid(3) != true) {
                             conn?.close()
                             initStorage()
                         }
