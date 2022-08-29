@@ -16,7 +16,6 @@ class UserDaoImpl(private val conn: Connection?) : UserDao {
         if (users.size == 0) {
             users = getAllUsers()
         }
-        println(users.size)
 
         val user = getUser(userId)
 

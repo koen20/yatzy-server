@@ -11,12 +11,13 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import nl.koenhabets.StatsCollector
 import nl.koenhabets.model.*
 import nl.koenhabets.storage.StorageMysql
 import java.time.Duration
 import java.util.*
 
-fun Application.configureSockets(storage: StorageMysql) {
+fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCollector) {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)
@@ -30,6 +31,7 @@ fun Application.configureSockets(storage: StorageMysql) {
         webSocket("api/v1/ws") {
             val thisConnection = Connection(this)
             connections += thisConnection
+            statsCollector.setWsConnected(connections.size)
 
             try {
                 for (frame in incoming) {
@@ -81,7 +83,7 @@ fun Application.configureSockets(storage: StorageMysql) {
                                     }
                                 } else if (res.action == ActionType.endGame) {
                                     val actionRes = Json.decodeFromJsonElement<Message.EndGame>(res.data)
-                                    if (actionRes.game !== "test") {
+                                    if (actionRes.game != "test") {
                                         storage.gameDao.addGame(actionRes)
                                     }
                                 }
@@ -97,6 +99,7 @@ fun Application.configureSockets(storage: StorageMysql) {
                 }
             } finally {
                 connections -= thisConnection
+                statsCollector.setWsConnected(connections.size)
             }
         }
     }

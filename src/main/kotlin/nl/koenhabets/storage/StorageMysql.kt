@@ -10,6 +10,7 @@ class StorageMysql(configItem: ConfigItem?) {
     var conn: Connection? = null
     var userDao: UserDao
     var gameDao: GameDao
+    var statsDao: StatsDao
     private lateinit var configItem: ConfigItem
 
     init {
@@ -38,6 +39,7 @@ class StorageMysql(configItem: ConfigItem?) {
         }
         userDao = UserDaoImpl(conn)
         gameDao = GameDaoImpl(conn)
+        statsDao = StatsDaoImpl(conn)
     }
 
     fun initStorage() {
