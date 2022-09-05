@@ -59,8 +59,9 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                         thisConnection.subscriptions.add(actionRes.userId)
                                     }
                                 } else if (res.action == ActionType.score) {
-                                    if (thisConnection.loggedIn && thisConnection.userId !== null) {
+                                    if (thisConnection.userId !== null) {
                                         val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
+                                        thisConnection.updateHighestScoreCount(actionRes.fullScore)
                                         val scoreResponse = Response.ScoreResponse(
                                             actionRes.username,
                                             thisConnection.userId!!,
@@ -83,7 +84,7 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                     }
                                 } else if (res.action == ActionType.endGame) {
                                     val actionRes = Json.decodeFromJsonElement<Message.EndGame>(res.data)
-                                    if (actionRes.game != "test") {
+                                    if (actionRes.game != "test" && thisConnection.highestScoreCount > 7) {
                                         storage.gameDao.addGame(actionRes)
                                     }
                                 }
