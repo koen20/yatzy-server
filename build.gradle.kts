@@ -4,8 +4,8 @@ val logback_version: String by project
 
 plugins {
     application
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("jvm") version "1.8.0"
+    kotlin("plugin.serialization") version "1.8.0"
 }
 
 group = "nl.koenhabets"
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.0.6")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.1.2")
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-websockets-jvm:$ktor_version")
