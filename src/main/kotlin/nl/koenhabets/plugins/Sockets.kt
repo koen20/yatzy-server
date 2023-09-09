@@ -57,12 +57,23 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                     val actionRes = Json.decodeFromJsonElement<Message.Subscribe>(res.data)
                                     if (!thisConnection.subscriptions.contains(actionRes.userId)) {
                                         thisConnection.subscriptions.add(actionRes.userId)
+                                        connections.forEach {
+                                                if (it.userId == actionRes.userId && it.lastScoreResponse != null) {
+                                                    val response = Response(
+                                                        ResponseType.scoreResponse,
+                                                        Json.encodeToJsonElement(it.lastScoreResponse).jsonObject
+                                                    )
+                                                    thisConnection.session.send(Json.encodeToString(response))
+                                                    return@forEach
+                                                }
+
+                                        }
                                     }
                                 } else if (res.action == ActionType.score) {
                                     if (thisConnection.userId !== null) {
                                         val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
                                         thisConnection.updateHighestScoreCount(actionRes.fullScore)
-                                        val scoreResponse = Response.ScoreResponse(
+                                        thisConnection.lastScoreResponse = Response.ScoreResponse(
                                             actionRes.username,
                                             thisConnection.userId!!,
                                             actionRes.game,
@@ -75,7 +86,7 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                                 if (it == thisConnection.userId) {
                                                     val response = Response(
                                                         ResponseType.scoreResponse,
-                                                        Json.encodeToJsonElement(scoreResponse).jsonObject
+                                                        Json.encodeToJsonElement(thisConnection.lastScoreResponse).jsonObject
                                                     )
                                                     connection.session.send(Json.encodeToString(response))
                                                 }

@@ -9,6 +9,7 @@ class Connection(val session: DefaultWebSocketSession) {
     var userId: String? = null
     val subscriptions: ArrayList<String> = ArrayList()
     var highestScoreCount: Int = 0
+    var lastScoreResponse: Response.ScoreResponse? = null
 
     fun updateHighestScoreCount(fullScore: JsonObject) {
         val scoreCount = getScoreCount(fullScore)
