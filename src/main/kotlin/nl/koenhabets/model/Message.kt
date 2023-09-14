@@ -13,7 +13,8 @@ enum class ActionType {
 enum class ResponseType {
     loginResponse,
     scoreResponse,
-    errorResponse
+    errorResponse,
+    pairResponse
 }
 
 @Serializable
@@ -22,7 +23,7 @@ data class Message(
     val data: JsonObject
 ) {
     @Serializable
-    data class Subscribe(val userId: String)
+    data class Subscribe(val userId: String, val pairCode: String?)
 
     @Serializable
     data class Score(
@@ -61,5 +62,11 @@ data class Response(
     @Serializable
     data class ErrorResponse(
         val message: String
+    )
+
+    @Serializable
+    data class PairResponse(
+        val userId: String,
+        val pairCode: String
     )
 }

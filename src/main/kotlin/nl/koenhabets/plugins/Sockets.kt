@@ -5,7 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -58,14 +57,26 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                     if (!thisConnection.subscriptions.contains(actionRes.userId)) {
                                         thisConnection.subscriptions.add(actionRes.userId)
                                         connections.forEach {
-                                                if (it.userId == actionRes.userId && it.lastScoreResponse != null) {
-                                                    val response = Response(
-                                                        ResponseType.scoreResponse,
-                                                        Json.encodeToJsonElement(it.lastScoreResponse).jsonObject
-                                                    )
-                                                    thisConnection.session.send(Json.encodeToString(response))
-                                                    return@forEach
+                                            if (it.userId == actionRes.userId && it.lastScoreResponse != null) {
+                                                val response = Response(
+                                                    ResponseType.scoreResponse,
+                                                    Json.encodeToJsonElement(it.lastScoreResponse).jsonObject
+                                                )
+                                                thisConnection.session.send(Json.encodeToString(response))
+                                                actionRes.pairCode?.let { pairCode ->
+                                                    thisConnection.userId?.let {userId ->
+                                                        val pairResponse = Response.PairResponse(userId, pairCode)
+                                                        val pResponse = Response(
+                                                            ResponseType.pairResponse,
+                                                            Json.encodeToJsonElement(pairResponse).jsonObject
+                                                        )
+                                                        it.session.send(Json.encodeToString(pResponse))
+                                                    }
+
                                                 }
+
+                                                return@forEach
+                                            }
 
                                         }
                                     }
