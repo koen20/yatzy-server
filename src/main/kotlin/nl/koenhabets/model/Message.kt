@@ -23,7 +23,7 @@ data class Message(
     val data: JsonObject
 ) {
     @Serializable
-    data class Subscribe(val userId: String, val pairCode: String?)
+    data class Subscribe(val userId: String, val pairCode: String? = null)
 
     @Serializable
     data class Score(
