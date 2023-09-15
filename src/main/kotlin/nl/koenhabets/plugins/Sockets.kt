@@ -27,6 +27,9 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
 
     routing {
         val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
+        val json = Json {
+            ignoreUnknownKeys = true
+        }
         webSocket("api/v1/ws") {
             val thisConnection = Connection(this)
             connections += thisConnection
@@ -36,10 +39,10 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                 for (frame in incoming) {
                     when (frame) {
                         is Frame.Text -> {
-                            val res = Json.decodeFromString<Message>(frame.readText())
+                            val res = json.decodeFromString<Message>(frame.readText())
                             if (res.action == ActionType.login) {
                                 var success = false
-                                val actionRes = Json.decodeFromJsonElement<Message.Login>(res.data)
+                                val actionRes = json.decodeFromJsonElement<Message.Login>(res.data)
                                 if (storage.userDao.checkUser(actionRes.userId, actionRes.key)) {
                                     thisConnection.loggedIn = true
                                     thisConnection.userId = actionRes.userId
@@ -48,29 +51,29 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                 val loginResponse = Response.LoginResponse(success)
                                 val response = Response(
                                     ResponseType.loginResponse,
-                                    Json.encodeToJsonElement(loginResponse).jsonObject
+                                    json.encodeToJsonElement(loginResponse).jsonObject
                                 )
-                                thisConnection.session.send(Json.encodeToString(response))
+                                thisConnection.session.send(json.encodeToString(response))
                             } else if (thisConnection.loggedIn) {
                                 if (res.action == ActionType.subscribe) {
-                                    val actionRes = Json.decodeFromJsonElement<Message.Subscribe>(res.data)
+                                    val actionRes = json.decodeFromJsonElement<Message.Subscribe>(res.data)
                                     if (!thisConnection.subscriptions.contains(actionRes.userId)) {
                                         thisConnection.subscriptions.add(actionRes.userId)
                                         connections.forEach {
                                             if (it.userId == actionRes.userId && it.lastScoreResponse != null) {
                                                 val response = Response(
                                                     ResponseType.scoreResponse,
-                                                    Json.encodeToJsonElement(it.lastScoreResponse).jsonObject
+                                                    json.encodeToJsonElement(it.lastScoreResponse).jsonObject
                                                 )
-                                                thisConnection.session.send(Json.encodeToString(response))
+                                                thisConnection.session.send(json.encodeToString(response))
                                                 actionRes.pairCode?.let { pairCode ->
                                                     thisConnection.userId?.let {userId ->
                                                         val pairResponse = Response.PairResponse(userId, pairCode)
                                                         val pResponse = Response(
                                                             ResponseType.pairResponse,
-                                                            Json.encodeToJsonElement(pairResponse).jsonObject
+                                                            json.encodeToJsonElement(pairResponse).jsonObject
                                                         )
-                                                        it.session.send(Json.encodeToString(pResponse))
+                                                        it.session.send(json.encodeToString(pResponse))
                                                     }
 
                                                 }
@@ -82,7 +85,7 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                     }
                                 } else if (res.action == ActionType.score) {
                                     if (thisConnection.userId !== null) {
-                                        val actionRes = Json.decodeFromJsonElement<Message.Score>(res.data)
+                                        val actionRes = json.decodeFromJsonElement<Message.Score>(res.data)
                                         thisConnection.updateHighestScoreCount(actionRes.fullScore)
                                         thisConnection.lastScoreResponse = Response.ScoreResponse(
                                             actionRes.username,
@@ -97,15 +100,15 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                                 if (it == thisConnection.userId) {
                                                     val response = Response(
                                                         ResponseType.scoreResponse,
-                                                        Json.encodeToJsonElement(thisConnection.lastScoreResponse).jsonObject
+                                                        json.encodeToJsonElement(thisConnection.lastScoreResponse).jsonObject
                                                     )
-                                                    connection.session.send(Json.encodeToString(response))
+                                                    connection.session.send(json.encodeToString(response))
                                                 }
                                             }
                                         }
                                     }
                                 } else if (res.action == ActionType.endGame) {
-                                    val actionRes = Json.decodeFromJsonElement<Message.EndGame>(res.data)
+                                    val actionRes = json.decodeFromJsonElement<Message.EndGame>(res.data)
                                     if (actionRes.game != "test" && thisConnection.highestScoreCount > 7) {
                                         storage.gameDao.addGame(actionRes)
                                     }
