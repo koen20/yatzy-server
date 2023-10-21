@@ -26,6 +26,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.2")
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-forwarded-header:$ktor_version")
     implementation("io.ktor:ktor-server-websockets-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
