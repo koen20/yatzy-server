@@ -2,7 +2,6 @@ package nl.koenhabets.plugins
 
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -35,12 +34,6 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
             val thisConnection = Connection(this)
             connections += thisConnection
             statsCollector.setWsConnected(connections.size)
-
-            println("""Client connected cf-ip=${this.call.request.headers["CF-Connecting-IP"]} proxy-ip=${this.call.request.origin.remoteHost}""")
-            this.call.request.headers.forEach { s, strings ->
-                println("""Headers: ${s}: $strings""")
-            }
-            println("""Client connected cf-ip=${this.call.request.headers} proxy-ip=${this.call.request.origin.remoteHost}""")
 
             try {
                 for (frame in incoming) {
