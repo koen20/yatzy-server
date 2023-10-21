@@ -37,6 +37,10 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
             statsCollector.setWsConnected(connections.size)
 
             println("""Client connected cf-ip=${this.call.request.headers["CF-Connecting-IP"]} proxy-ip=${this.call.request.origin.remoteHost}""")
+            this.call.request.headers.forEach { s, strings ->
+                println("""Headers: ${s}: $strings""")
+            }
+            println("""Client connected cf-ip=${this.call.request.headers} proxy-ip=${this.call.request.origin.remoteHost}""")
 
             try {
                 for (frame in incoming) {
