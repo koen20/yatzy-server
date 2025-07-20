@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk as builder
+FROM eclipse-temurin:21-jdk as builder
 
 COPY . /usr/src/app
 WORKDIR /usr/src/app
@@ -6,7 +6,7 @@ RUN chmod +x gradlew
 RUN ./gradlew clean build
 RUN tar -xvf build/distributions/Yatzy-server-1.0.tar
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:21-jre
 
 ENV APPLICATION_USER ktor
 RUN useradd -ms /bin/bash $APPLICATION_USER

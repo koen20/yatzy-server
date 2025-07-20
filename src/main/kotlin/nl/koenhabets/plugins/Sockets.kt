@@ -5,7 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -13,13 +12,13 @@ import kotlinx.serialization.json.jsonObject
 import nl.koenhabets.StatsCollector
 import nl.koenhabets.model.*
 import nl.koenhabets.storage.StorageMysql
-import java.time.Duration
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCollector) {
     install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(15)
+        pingPeriod = 15.seconds
+        timeout = 15.seconds
         maxFrameSize = Long.MAX_VALUE
         masking = false
         contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true })
@@ -60,7 +59,7 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                     if (!thisConnection.subscriptions.contains(actionRes.userId)) {
                                         thisConnection.subscriptions.add(actionRes.userId)
                                         connections.forEach {
-                                            if (it.userId == actionRes.userId && it.lastScoreResponse != null) {
+                                            if (it?.userId == actionRes.userId && it.lastScoreResponse != null) {
                                                 val response = Response(
                                                     ResponseType.scoreResponse,
                                                     json.encodeToJsonElement(it.lastScoreResponse).jsonObject
@@ -96,7 +95,7 @@ fun Application.configureSockets(storage: StorageMysql, statsCollector: StatsCol
                                             actionRes.lastUpdate
                                         )
                                         connections.forEach { connection ->
-                                            connection.subscriptions.forEach {
+                                            connection?.subscriptions?.forEach {
                                                 if (it == thisConnection.userId) {
                                                     val response = Response(
                                                         ResponseType.scoreResponse,
