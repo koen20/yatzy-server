@@ -5,7 +5,7 @@ import java.sql.Connection
 import java.sql.SQLException
 
 interface UserDao {
-    /** Create user if it doens't exist and checks if the userId and key are correct */
+    /** Create user if it doesn't exist and checks if the userId and key are correct */
     fun checkUser(userId: String, key: String): Boolean
 }
 
